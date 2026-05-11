@@ -1,7 +1,7 @@
 export default function TelegramButton() {
   return (
     <a
-      href="https://t.me/+93kGa-c_OF85ZTQ5"
+      href="https://t.me/+qC-qXtGqew81ZWY5"
       target="_blank"
       className="fixed right-5 top-5 z-[9998] flex items-center gap-2 rounded-full border border-sky-500/20 bg-sky-500/10 px-4 py-3 text-sm font-semibold text-sky-300 shadow-[0_0_30px_rgba(14,165,233,0.18)] backdrop-blur-xl transition hover:scale-105 hover:bg-sky-500/20"
     >
