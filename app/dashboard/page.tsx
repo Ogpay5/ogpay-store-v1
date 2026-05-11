@@ -161,6 +161,13 @@ export default function DashboardPage() {
                   >
                     Add Funds
                   </a>
+
+                  <a
+                    href="/wallet"
+                    className="mt-4 inline-block rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white hover:bg-emerald-500"
+                  >
+                    Add Funds
+                  </a>
                 </div>
               </div>
             </div>
