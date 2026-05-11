@@ -17,7 +17,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <h1 className="mx-auto max-w-full text-center text-[clamp(3rem,14vw,6.5rem)] font-black leading-none tracking-[0.08em]">
+          <h1 className="mx-auto max-w-[92%] text-center text-[clamp(2.7rem,12vw,6rem)] font-black leading-none tracking-[0.05em] sm:max-w-full">
             <span className="bg-gradient-to-r from-violet-500 to-violet-300 bg-clip-text text-transparent">
               OG
             </span>
@@ -32,11 +32,46 @@ export default function HomePage() {
             We accept crypto
           </p>
 
-          <div className="mt-8 flex items-center justify-center gap-4">
-            <span className="grid h-12 w-12 place-items-center rounded-full bg-orange-500 text-xl font-bold shadow-lg shadow-orange-500/20">₿</span>
-            <span className="grid h-12 w-12 place-items-center rounded-full bg-zinc-700 text-xl font-bold shadow-lg shadow-zinc-500/10">Ξ</span>
-            <span className="grid h-12 w-12 place-items-center rounded-full bg-emerald-500 text-xl font-bold shadow-lg shadow-emerald-500/20">₮</span>
-            <span className="grid h-12 w-12 place-items-center rounded-full bg-blue-500 text-xl font-bold shadow-lg shadow-blue-500/20">$</span>
+          <div className="mt-10 flex items-center justify-center gap-5">
+            <div className="flex flex-col items-center gap-3">
+              <div className="grid h-16 w-16 place-items-center rounded-full border border-orange-400/30 bg-orange-500 text-3xl font-black text-white shadow-[0_0_35px_rgba(249,115,22,0.35)]">
+                ₿
+              </div>
+
+              <span className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+                Bitcoin
+              </span>
+            </div>
+
+            <div className="flex flex-col items-center gap-3">
+              <div className="grid h-16 w-16 place-items-center rounded-full border border-zinc-500/30 bg-zinc-700 text-3xl font-black text-white shadow-[0_0_35px_rgba(113,113,122,0.25)]">
+                Ξ
+              </div>
+
+              <span className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+                Ethereum
+              </span>
+            </div>
+
+            <div className="flex flex-col items-center gap-3">
+              <div className="grid h-16 w-16 place-items-center rounded-full border border-emerald-400/30 bg-emerald-500 text-3xl font-black text-white shadow-[0_0_35px_rgba(16,185,129,0.3)]">
+                ₮
+              </div>
+
+              <span className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+                USDT
+              </span>
+            </div>
+
+            <div className="flex flex-col items-center gap-3">
+              <div className="grid h-16 w-16 place-items-center rounded-full border border-blue-400/30 bg-blue-500 text-3xl font-black text-white shadow-[0_0_35px_rgba(59,130,246,0.3)]">
+                $
+              </div>
+
+              <span className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
+                USDC
+              </span>
+            </div>
           </div>
 
           <div className="mx-auto mt-14 grid max-w-2xl gap-5">
