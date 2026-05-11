@@ -27,10 +27,10 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
     });
-  } catch (error) {
+  } catch (error: any) {
     return NextResponse.json(
       {
-        error: "Email failed",
+        error: error?.message || "Email failed",
       },
       {
         status: 500,
