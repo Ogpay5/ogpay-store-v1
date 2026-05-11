@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata } from "next";
 import AppAlert from "./components/AppAlert";
+import TelegramButton from "./components/TelegramButton";
 
 export const metadata: Metadata = {
   title: "OGPAYTRUE",
@@ -16,6 +17,7 @@ export default function RootLayout({
     <html lang="en">
       <body>
         {children}
+        <TelegramButton />
         <AppAlert />
       </body>
     </html>
