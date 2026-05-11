@@ -161,21 +161,15 @@ export async function POST(req: Request) {
       .from("orders")
       .insert({
         user_id: user.id,
-        total_amount: total,
-        status: "completed",
+        total_price: total,
+        status: "delivered",
+        paid: true,
+        delivered: true,
+        delivered_content: deliveredLines.join("\n"),
         order_code: orderCode,
       })
       .select()
       .single();
-
-    if (order) {
-      await admin
-        .from("order_deliveries")
-        .insert({
-          order_id: order.id,
-          delivered_content: deliveredLines.join("\n"),
-        });
-    }
 
     await admin
       .from("cart_items")
