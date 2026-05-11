@@ -137,7 +137,7 @@ export default function DashboardPage() {
                 24/7 ACTIVE
               </p>
 
-              <h1 className="mt-4 text-4xl font-bold md:text-5xl">
+              <h1 className="mt-4 text-3xl font-bold md:text-4xl">
                 Client Dashboard
               </h1>
 
@@ -162,24 +162,12 @@ export default function DashboardPage() {
                     Add Funds
                   </a>
 
-                  <a
-                    href="/wallet"
-                    className="mt-4 inline-block rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white hover:bg-emerald-500"
-                  >
-                    Add Funds
-                  </a>
+                  
                 </div>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-violet-500/20 bg-violet-500/10 px-6 py-4">
-              <p className="text-sm uppercase tracking-[0.25em] text-zinc-400">
-                Crypto
-              </p>
-              <p className="mt-1 text-xl font-semibold">
-                Accepted
-              </p>
-            </div>
+            
           </div>
         </div>
 
