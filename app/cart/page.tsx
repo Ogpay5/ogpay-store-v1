@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/src/lib/supabase";
+import toast from "react-hot-toast";
 
 type CartItem = {
   id: string;
@@ -81,7 +82,7 @@ export default function CartPage() {
     const token = data.session?.access_token;
 
     if (!token) {
-      alert("Not authenticated.");
+      toast.error("Not authenticated.");
       return;
     }
 

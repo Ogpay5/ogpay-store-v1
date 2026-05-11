@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { supabase } from "@/src/lib/supabase";
+import toast from "react-hot-toast";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -22,7 +23,7 @@ export default function RegisterPage() {
     });
 
     if (error) {
-      alert(error.message);
+      toast.error(error.message);
       return;
     }
 
@@ -36,7 +37,7 @@ export default function RegisterPage() {
       });
     }
 
-    alert("Account created. Please check your email to verify your account. After verification, wait for admin approval.");
+    toast.success("Account created. Check your email to verify your account.");
     window.location.href = "/login";
   }
 
