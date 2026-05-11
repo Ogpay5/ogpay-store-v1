@@ -3,226 +3,212 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/src/lib/supabase";
 
-type Product = {
+type UserProfile = {
   id: string;
-  title: string;
-  description: string | null;
-  price_per_pack: number;
-  lines_per_pack: number;
-  stock_count: number;
-  active: boolean;
+  email: string;
+  approved: boolean;
+  role: string | null;
+  balance: number;
+  created_at: string;
 };
 
 export default function AdminPage() {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [pricePerPack, setPricePerPack] = useState("25");
-  const [linesPerPack, setLinesPerPack] = useState("100");
-  const [file, setFile] = useState<File | null>(null);
-
-  async function loadProducts() {
-    const { data, error } = await supabase
-      .from("products")
-      .select("id,title,description,price_per_pack,lines_per_pack,stock_count,active")
-      .order("created_at", { ascending: false });
-
-    if (error) alert(error.message);
-    else setProducts(data || []);
-  }
+  const [users, setUsers] = useState<UserProfile[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadProducts();
+    loadUsers();
   }, []);
 
-  async function insertLinesInBatches(productId: string, lines: string[]) {
-    const batchSize = 500;
+  async function getToken() {
+    const { data } = await supabase.auth.getSession();
+    return data.session?.access_token || "";
+  }
 
-    for (let i = 0; i < lines.length; i += batchSize) {
-      const batch = lines.slice(i, i + batchSize).map((line) => ({
-        product_id: productId,
-        content: line,
-      }));
+  async function loadUsers() {
+    const token = await getToken();
 
-      const { error } = await supabase.from("product_lines").insert(batch);
+    const response = await fetch("/api/admin/users", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
-      if (error) {
-        alert(error.message);
-        return false;
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Failed to load users.");
+      return;
+    }
+
+    setUsers(data.users || []);
+    setLoading(false);
+  }
+
+  async function adminAction(
+    userId: string,
+    action: string
+  ) {
+    const token = await getToken();
+
+    let amount = 0;
+
+    if (
+      action === "add_balance" ||
+      action === "remove_balance"
+    ) {
+      const input = prompt("Enter amount");
+
+      if (!input) return;
+
+      amount = Number(input);
+
+      if (!amount || amount <= 0) {
+        alert("Invalid amount.");
+        return;
       }
     }
 
-    return true;
+    const response = await fetch("/api/admin/users", {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        userId,
+        action,
+        amount,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Action failed.");
+      return;
+    }
+
+    loadUsers();
   }
 
-  async function addTxtToProduct(product: Product, selectedFile: File) {
-    const text = await selectedFile.text();
-
-    const lines = text
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0);
-
-    if (lines.length === 0) {
-      alert("El archivo está vacío.");
-      return;
-    }
-
-    const ok = await insertLinesInBatches(product.id, lines);
-    if (!ok) return;
-
-    const { error } = await supabase
-      .from("products")
-      .update({
-        stock_count: product.stock_count + lines.length,
-        active: true,
-      })
-      .eq("id", product.id);
-
-    if (error) alert(error.message);
-    else {
-      alert(`Se agregaron ${lines.length} líneas al producto`);
-      loadProducts();
-    }
-  }
-
-  async function createProduct() {
-    if (!file) {
-      alert("Sube un archivo .txt");
-      return;
-    }
-
-    if (Number(pricePerPack) < 25) {
-      alert("El precio mínimo por paquete es $25");
-      return;
-    }
-
-    const text = await file.text();
-
-    const lines = text
-      .split(/\r?\n/)
-      .map((line) => line.trim())
-      .filter((line) => line.length > 0);
-
-    if (lines.length < Number(linesPerPack)) {
-      alert("El archivo no tiene suficientes líneas para un paquete.");
-      return;
-    }
-
-    const { data: product, error } = await supabase
-      .from("products")
-      .insert({
-        title,
-        description,
-        price_per_pack: Number(pricePerPack),
-        lines_per_pack: Number(linesPerPack),
-        stock_count: lines.length,
-        active: true,
-      })
-      .select()
-      .single();
-
-    if (error || !product) {
-      alert(error?.message || "No se pudo crear el producto");
-      return;
-    }
-
-    const ok = await insertLinesInBatches(product.id, lines);
-    if (!ok) return;
-
-    alert(`Producto creado con ${lines.length} líneas disponibles`);
-
-    setTitle("");
-    setDescription("");
-    setPricePerPack("25");
-    setLinesPerPack("100");
-    setFile(null);
-    loadProducts();
-  }
-
-  async function updateProduct(product: Product) {
-    const { error } = await supabase
-      .from("products")
-      .update({
-        title: product.title,
-        description: product.description,
-        price_per_pack: Number(product.price_per_pack),
-        lines_per_pack: Number(product.lines_per_pack),
-        active: product.active,
-      })
-      .eq("id", product.id);
-
-    if (error) alert(error.message);
-    else {
-      alert("Producto actualizado");
-      loadProducts();
-    }
-  }
-
-  function changeProduct(id: string, field: keyof Product, value: any) {
-    setProducts((items) =>
-      items.map((p) => (p.id === id ? { ...p, [field]: value } : p))
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-[#050505] text-white flex items-center justify-center">
+        Loading...
+      </main>
     );
   }
 
   return (
-    <main className="min-h-screen p-10">
-      <h1 className="text-3xl font-bold mb-6">Panel Admin</h1>
+    <main className="relative min-h-screen overflow-hidden bg-[#050505] text-white">
+      <div className="absolute inset-0">
+        <div className="absolute left-[-8rem] top-[-5rem] h-64 w-[32rem] rotate-[-28deg] rounded-[2rem] border border-white/10 bg-gradient-to-br from-zinc-700/30 to-black shadow-2xl shadow-black" />
+        <div className="absolute right-[-9rem] top-[-6rem] h-72 w-[34rem] rotate-[20deg] rounded-[2rem] border border-white/10 bg-gradient-to-br from-zinc-800/40 to-black shadow-2xl shadow-black" />
+      </div>
 
-      <section className="max-w-xl border rounded-2xl p-5 mb-10">
-        <h2 className="text-xl font-bold mb-4">Crear producto con TXT</h2>
+      <section className="relative z-10 mx-auto max-w-7xl px-6 py-10">
+        <div className="mb-10 flex items-center justify-between">
+          <h1 className="text-5xl font-black tracking-[0.14em]">
+            <span className="bg-gradient-to-r from-violet-500 to-violet-300 bg-clip-text text-transparent">
+              OG
+            </span>
+            <span className="text-zinc-100">
+              ADMIN
+            </span>
+          </h1>
 
-        <input className="w-full border p-3 mb-3 rounded" placeholder="Nombre del producto" value={title} onChange={(e) => setTitle(e.target.value)} />
+          <a
+            href="/dashboard"
+            className="rounded-xl border border-white/10 px-5 py-3 text-sm text-zinc-300 hover:bg-white/5"
+          >
+            Dashboard
+          </a>
+        </div>
 
-        <textarea className="w-full border p-3 mb-3 rounded" placeholder="Descripción" value={description} onChange={(e) => setDescription(e.target.value)} />
+        <div className="rounded-[2rem] border border-white/10 bg-black/35 p-8 backdrop-blur-xl">
+          <div className="mb-8 flex items-center justify-between">
+            <h2 className="text-3xl font-bold">
+              Users
+            </h2>
 
-        <input className="w-full border p-3 mb-3 rounded" placeholder="Precio por paquete mínimo 25" value={pricePerPack} onChange={(e) => setPricePerPack(e.target.value)} />
+            <p className="text-zinc-500">
+              {users.length} users
+            </p>
+          </div>
 
-        <input className="w-full border p-3 mb-3 rounded" placeholder="Líneas por paquete" value={linesPerPack} onChange={(e) => setLinesPerPack(e.target.value)} />
+          <div className="space-y-5">
+            {users.map((user) => (
+              <div
+                key={user.id}
+                className="rounded-2xl border border-white/10 bg-white/[0.03] p-6"
+              >
+                <div className="flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
+                  <div>
+                    <p className="text-xl font-semibold">
+                      {user.email}
+                    </p>
 
-        <input className="w-full border p-3 mb-4 rounded" type="file" accept=".txt" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+                    <div className="mt-4 flex flex-wrap items-center gap-3">
+                      <span className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.2em] ${
+                        user.approved
+                          ? "bg-emerald-500/10 text-emerald-300"
+                          : "bg-red-500/10 text-red-300"
+                      }`}>
+                        {user.approved ? "Approved" : "Blocked"}
+                      </span>
 
-        <button onClick={createProduct} className="bg-black text-white px-5 py-3 rounded">
-          Crear producto
-        </button>
-      </section>
+                      <span className="rounded-full bg-violet-500/10 px-4 py-2 text-xs uppercase tracking-[0.2em] text-violet-300">
+                        {user.role || "client"}
+                      </span>
 
-      <section>
-        <h2 className="text-2xl font-bold mb-4">Mis productos</h2>
+                      <span className="rounded-full bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.2em] text-zinc-300">
+                        Balance ${Number(user.balance || 0).toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
 
-        <div className="grid gap-5">
-          {products.map((product) => (
-            <div key={product.id} className="border rounded-2xl p-5 max-w-2xl">
-              <input className="w-full border p-3 mb-3 rounded" value={product.title} onChange={(e) => changeProduct(product.id, "title", e.target.value)} />
+                  <div className="flex flex-wrap gap-3">
+                    <button
+                      onClick={() =>
+                        adminAction(user.id, "approve")
+                      }
+                      className="rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-white hover:bg-emerald-500"
+                    >
+                      Approve
+                    </button>
 
-              <textarea className="w-full border p-3 mb-3 rounded" value={product.description || ""} onChange={(e) => changeProduct(product.id, "description", e.target.value)} />
+                    <button
+                      onClick={() =>
+                        adminAction(user.id, "block")
+                      }
+                      className="rounded-xl bg-red-600 px-4 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-white hover:bg-red-500"
+                    >
+                      Block
+                    </button>
 
-              <input className="w-full border p-3 mb-3 rounded" value={product.price_per_pack} onChange={(e) => changeProduct(product.id, "price_per_pack", Number(e.target.value))} />
+                    <button
+                      onClick={() =>
+                        adminAction(user.id, "add_balance")
+                      }
+                      className="rounded-xl bg-violet-600 px-4 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-white hover:bg-violet-500"
+                    >
+                      Add Balance
+                    </button>
 
-              <input className="w-full border p-3 mb-3 rounded" value={product.lines_per_pack} onChange={(e) => changeProduct(product.id, "lines_per_pack", Number(e.target.value))} />
-
-              <p className="mb-2">Stock disponible: {product.stock_count} líneas</p>
-
-              <input
-                className="w-full border p-3 mb-3 rounded"
-                type="file"
-                accept=".txt"
-                onChange={(e) => {
-                  const selectedFile = e.target.files?.[0];
-                  if (selectedFile) addTxtToProduct(product, selectedFile);
-                }}
-              />
-
-              <label className="flex items-center gap-2 mb-4">
-                <input type="checkbox" checked={product.active} onChange={(e) => changeProduct(product.id, "active", e.target.checked)} />
-                Producto activo
-              </label>
-
-              <button onClick={() => updateProduct(product)} className="bg-black text-white px-5 py-3 rounded">
-                Guardar cambios
-              </button>
-            </div>
-          ))}
+                    <button
+                      onClick={() =>
+                        adminAction(user.id, "remove_balance")
+                      }
+                      className="rounded-xl border border-white/10 px-4 py-3 text-sm font-semibold uppercase tracking-[0.15em] text-zinc-300 hover:bg-white/5"
+                    >
+                      Remove Balance
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </main>
