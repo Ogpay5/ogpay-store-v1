@@ -109,12 +109,20 @@ export default function DashboardPage() {
 
           <nav className="flex items-center gap-3">
             <a href="/cart" className="flex items-center gap-2 rounded-2xl bg-violet-600 px-5 py-3 font-semibold hover:bg-violet-500">
-              🛒
+              <svg className="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="9" cy="21" r="1" />
+                <circle cx="20" cy="21" r="1" />
+                <path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6" />
+              </svg>
               Cart
             </a>
 
             <a href="/orders" className="flex items-center gap-2 rounded-2xl border border-white/10 px-5 py-3 text-zinc-300 hover:bg-white/5">
-              📦
+              <svg className="h-6 w-6 text-violet-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.1" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73L13 2.27a2 2 0 0 0-2 0L4 6.27A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+                <path d="M3.3 7L12 12l8.7-5" />
+                <path d="M12 22V12" />
+              </svg>
               Orders
             </a>
 
