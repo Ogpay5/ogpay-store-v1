@@ -20,7 +20,9 @@ export async function POST(req: Request) {
     body: JSON.stringify({
       price_amount: amount,
       price_currency: "usd",
-      order_id: `topup-${Date.now()}`,
+      const topupId = crypto.randomUUID();
+
+      order_id: `topup-${topupId}`,
       order_description: "OGPAYTRUE Wallet Topup",
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/wallet?topup=success`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/wallet?topup=cancel`,

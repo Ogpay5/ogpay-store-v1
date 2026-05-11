@@ -1,149 +1,96 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
-export async function POST(request: Request) {
-  const body = await request.json();
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+);
 
-  console.log("NOWPayments webhook:", body);
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
 
-  const paymentStatus = body.payment_status;
-  const orderId = body.order_id;
+    const paymentStatus = body.payment_status;
+    const orderId = body.order_id;
 
-  if (!orderId) {
-    return NextResponse.json(
-      { error: "order_id faltante" },
-      { status: 400 }
-    );
-  }
-
-  if (!["finished", "confirmed", "sending"].includes(paymentStatus)) {
-    return NextResponse.json({
-      success: true,
-      ignored: paymentStatus,
-    });
-  }
-
-  const supabase = createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
-  );
-
-  const { data: order } = await supabase
-    .from("orders")
-    .select("*")
-    .eq("id", orderId)
-    .single();
-
-  if (!order) {
-    return NextResponse.json(
-      { error: "Orden no encontrada" },
-      { status: 404 }
-    );
-  }
-
-  if (order.delivered) {
-    return NextResponse.json({
-      success: true,
-      alreadyDelivered: true,
-    });
-  }
-
-  const { data: cartItems } = await supabase
-    .from("cart_items")
-    .select(`
-      id,
-      quantity_packs,
-      product:products (
-        id,
-        title,
-        price_per_pack,
-        lines_per_pack,
-        stock_count
-      )
-    `)
-    .eq("user_id", order.user_id);
-
-  if (!cartItems || cartItems.length === 0) {
-    return NextResponse.json(
-      { error: "Carrito vacío" },
-      { status: 400 }
-    );
-  }
-
-  let deliveredContent = "";
-
-  for (const item of cartItems as any[]) {
-    const product = item.product;
-
-    const linesNeeded =
-      item.quantity_packs *
-      product.lines_per_pack;
-
-    const { data: lines } = await supabase
-      .from("product_lines")
-      .select("id, content")
-      .eq("product_id", product.id)
-      .eq("sold", false)
-      .limit(linesNeeded);
-
-    if (!lines || lines.length < linesNeeded) {
+    if (!orderId) {
       return NextResponse.json(
-        {
-          error: `Stock insuficiente para ${product.title}`,
-        },
+        { error: "Missing order id" },
         { status: 400 }
       );
     }
 
-    const lineIds = lines.map((line) => line.id);
+    if (
+      paymentStatus !== "finished" &&
+      paymentStatus !== "confirmed"
+    ) {
+      return NextResponse.json({
+        received: true,
+      });
+    }
 
-    deliveredContent +=
-      `PRODUCTO: ${product.title}\n`;
+    const topupId = orderId.replace("topup-", "");
 
-    deliveredContent +=
-      lines.map((line) => line.content).join("\n");
+    const { data: topup } = await supabase
+      .from("topups")
+      .select("*")
+      .eq("id", topupId)
+      .single();
 
-    deliveredContent += "\n\n";
+    if (!topup) {
+      return NextResponse.json(
+        { error: "Topup not found" },
+        { status: 404 }
+      );
+    }
+
+    if (topup.payment_status === "completed") {
+      return NextResponse.json({
+        received: true,
+      });
+    }
+
+    const amount = Number(topup.amount);
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("balance")
+      .eq("id", topup.user_id)
+      .single();
+
+    const currentBalance = Number(profile?.balance || 0);
 
     await supabase
-      .from("product_lines")
+      .from("profiles")
       .update({
-        sold: true,
-        sold_at: new Date().toISOString(),
+        balance: currentBalance + amount,
       })
-      .in("id", lineIds);
-
-    const newStock =
-      product.stock_count - linesNeeded;
+      .eq("id", topup.user_id);
 
     await supabase
-      .from("products")
+      .from("wallet_transactions")
+      .insert({
+        user_id: topup.user_id,
+        type: "topup",
+        amount,
+        note: "Crypto wallet topup",
+      });
+
+    await supabase
+      .from("topups")
       .update({
-        stock_count: newStock,
-        active:
-          newStock >= product.lines_per_pack,
+        payment_status: "completed",
+        payment_id: body.payment_id?.toString() || null,
       })
-      .eq("id", product.id);
+      .eq("id", topup.id);
+
+    return NextResponse.json({
+      success: true,
+    });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Webhook server error" },
+      { status: 500 }
+    );
   }
-
-  await supabase
-    .from("orders")
-    .update({
-      paid: true,
-      delivered: true,
-      status: "delivered",
-      delivered_content: deliveredContent,
-      payment_id: String(body.payment_id || ""),
-    })
-    .eq("id", orderId);
-
-  await supabase
-    .from("cart_items")
-    .delete()
-    .eq("user_id", order.user_id);
-
-  return NextResponse.json({
-    success: true,
-    delivered: true,
-  });
 }
