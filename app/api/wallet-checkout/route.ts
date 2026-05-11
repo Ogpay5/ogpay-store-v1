@@ -73,7 +73,7 @@ export async function POST(req: Request) {
 
     let total = 0;
 
-    for (const item of cartItems) {
+    for (const item of cartItems as any[]) {
       total +=
         Number(item.product.price_per_pack) *
         Number(item.quantity_packs);
@@ -90,7 +90,7 @@ export async function POST(req: Request) {
 
     const deliveredLines: string[] = [];
 
-    for (const item of cartItems) {
+    for (const item of cartItems as any[]) {
       const needed =
         Number(item.product.lines_per_pack) *
         Number(item.quantity_packs);
