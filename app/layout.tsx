@@ -1,5 +1,6 @@
 import "./globals.css";
 import type { Metadata } from "next";
+import AppAlert from "./components/AppAlert";
 
 export const metadata: Metadata = {
   title: "OGPAYTRUE",
@@ -13,7 +14,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        {children}
+        <AppAlert />
+      </body>
     </html>
   );
 }
