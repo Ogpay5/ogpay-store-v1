@@ -7,8 +7,7 @@ type Order = {
   id: string;
   order_code: string | null;
   total_price: number | null;
-  total_amount: number | null;
-  status: string | null;
+    status: string | null;
   delivered_content: string | null;
   created_at: string;
 };
@@ -31,7 +30,7 @@ export default function OrdersPage() {
 
     const { data, error } = await supabase
       .from("orders")
-      .select("id,order_code,total_price,total_amount,status,delivered_content,created_at")
+      .select("id,order_code,total_price,status,delivered_content,created_at")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false });
 
@@ -112,7 +111,7 @@ export default function OrdersPage() {
             )}
 
             {orders.map((order) => {
-              const total = Number(order.total_amount ?? order.total_price ?? 0);
+              const total = Number(order.total_price ?? 0);
               const code = order.order_code || `OG-${order.id.slice(0, 8).toUpperCase()}`;
               const hasDelivery = Boolean(order.delivered_content && order.delivered_content.trim().length > 0);
 
