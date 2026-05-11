@@ -81,14 +81,22 @@ export default function LoginPage() {
           </h2>
 
           
-          <div className="mb-8 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5">
+          <div className="mb-8 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-6">
             <p className="text-sm uppercase tracking-[0.25em] text-amber-300">
-              Privacy Notice
+              Privacy Notice • Aviso de Privacidad
             </p>
 
-            <p className="mt-3 leading-7 text-zinc-300">
-              New client registrations require manual admin approval before access is granted to the private portal infrastructure.
-            </p>
+            <div className="mt-4 space-y-4">
+              <p className="leading-7 text-zinc-200">
+                New client registrations require manual admin approval before access is granted to the private portal infrastructure.
+              </p>
+
+              <div className="h-px bg-white/10"></div>
+
+              <p className="leading-7 text-zinc-400">
+                Los nuevos registros requieren aprobación manual del administrador antes de otorgar acceso a la infraestructura privada del portal.
+              </p>
+            </div>
           </div>
 
 <div className="mt-10 space-y-6">
