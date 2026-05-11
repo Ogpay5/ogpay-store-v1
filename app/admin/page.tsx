@@ -52,9 +52,7 @@ export default function AdminPage() {
     const token = await getToken();
 
     const response = await fetch("/api/admin/users", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { Authorization: `Bearer ${token}` },
     });
 
     const data = await response.json();
@@ -103,11 +101,7 @@ export default function AdminPage() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({
-        userId,
-        action,
-        amount,
-      }),
+      body: JSON.stringify({ userId, action, amount }),
     });
 
     const data = await response.json();
@@ -156,6 +150,11 @@ export default function AdminPage() {
     const linesPerPackValue = Number(linesPerPack);
     const pricePerPackValue = Number(pricePerPack);
 
+    if (!title.trim()) {
+      alert("Product name is required.");
+      return;
+    }
+
     if (!linesPerPackValue || linesPerPackValue <= 0) {
       alert("Invalid lines per pack.");
       return;
@@ -171,9 +170,7 @@ export default function AdminPage() {
       return;
     }
 
-    const availablePacks = Math.floor(
-      lines.length / linesPerPackValue
-    );
+    const availablePacks = Math.floor(lines.length / linesPerPackValue);
 
     const confirmCreate = confirm(
       `Product Summary\n\n` +
@@ -184,9 +181,7 @@ export default function AdminPage() {
       `Create product?`
     );
 
-    if (!confirmCreate) {
-      return;
-    }
+    if (!confirmCreate) return;
 
     const { data: product, error } = await supabase
       .from("products")
@@ -220,11 +215,33 @@ export default function AdminPage() {
     loadProducts();
   }
 
-  async function toggleProduct(product: Product) {
+  async function updateProduct(product: Product) {
+    const price = Number(product.price_per_pack);
+    const lines = Number(product.lines_per_pack);
+
+    if (!product.title.trim()) {
+      alert("Product name is required.");
+      return;
+    }
+
+    if (!price || price <= 0) {
+      alert("Invalid price.");
+      return;
+    }
+
+    if (!lines || lines <= 0) {
+      alert("Invalid lines per pack.");
+      return;
+    }
+
     const { error } = await supabase
       .from("products")
       .update({
-        active: !product.active,
+        title: product.title,
+        description: product.description,
+        price_per_pack: price,
+        lines_per_pack: lines,
+        active: product.active,
       })
       .eq("id", product.id);
 
@@ -233,7 +250,60 @@ export default function AdminPage() {
       return;
     }
 
+    alert("Product updated.");
     loadProducts();
+  }
+
+  async function addTxtToProduct(product: Product, selectedFile: File) {
+    const text = await selectedFile.text();
+
+    const lines = text
+      .split(/\r?\n/)
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0);
+
+    if (lines.length === 0) {
+      alert("TXT is empty.");
+      return;
+    }
+
+    const confirmAdd = confirm(
+      `Add TXT Stock\n\n` +
+      `Product: ${product.title}\n` +
+      `New Lines: ${lines.length}\n` +
+      `Current Stock: ${product.stock_count}\n` +
+      `New Stock: ${product.stock_count + lines.length}\n\n` +
+      `Continue?`
+    );
+
+    if (!confirmAdd) return;
+
+    const ok = await insertLines(product.id, lines);
+    if (!ok) return;
+
+    const { error } = await supabase
+      .from("products")
+      .update({
+        stock_count: product.stock_count + lines.length,
+        active: true,
+      })
+      .eq("id", product.id);
+
+    if (error) {
+      alert(error.message);
+      return;
+    }
+
+    alert(`Added ${lines.length} lines to product.`);
+    loadProducts();
+  }
+
+  function changeProduct(id: string, field: keyof Product, value: string | number | boolean | null) {
+    setProducts((items) =>
+      items.map((p) =>
+        p.id === id ? { ...p, [field]: value } : p
+      )
+    );
   }
 
   if (loading) {
@@ -317,23 +387,75 @@ export default function AdminPage() {
           <h2 className="text-3xl font-bold mb-6">Products</h2>
 
           <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            {products.map((product) => (
-              <div key={product.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-                <h3 className="text-xl font-bold">{product.title}</h3>
-                <p className="mt-2 text-zinc-400">{product.description}</p>
+            {products.map((product) => {
+              const packsAvailable = Math.floor(
+                Number(product.stock_count || 0) / Number(product.lines_per_pack || 1)
+              );
 
-                <div className="mt-4 text-sm text-zinc-300">
-                  <p>Price: ${product.price_per_pack}</p>
-                  <p>Pack: {product.lines_per_pack} lines</p>
-                  <p>Stock: {product.stock_count} lines</p>
-                  <p>Status: {product.active ? "Active" : "Inactive"}</p>
+              return (
+                <div key={product.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
+                  <input
+                    className="w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white"
+                    value={product.title}
+                    onChange={(e) => changeProduct(product.id, "title", e.target.value)}
+                  />
+
+                  <textarea
+                    className="mt-3 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white"
+                    value={product.description || ""}
+                    onChange={(e) => changeProduct(product.id, "description", e.target.value)}
+                  />
+
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    <input
+                      className="rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white"
+                      type="number"
+                      value={product.price_per_pack}
+                      onChange={(e) => changeProduct(product.id, "price_per_pack", Number(e.target.value))}
+                    />
+
+                    <input
+                      className="rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white"
+                      type="number"
+                      value={product.lines_per_pack}
+                      onChange={(e) => changeProduct(product.id, "lines_per_pack", Number(e.target.value))}
+                    />
+                  </div>
+
+                  <div className="mt-4 rounded-xl border border-white/10 bg-black/30 p-4 text-sm text-zinc-300">
+                    <p>Stock: {product.stock_count} lines</p>
+                    <p>Packs available: {packsAvailable}</p>
+                    <p>Status: {product.active ? "Active" : "Inactive"}</p>
+                  </div>
+
+                  <label className="mt-4 flex items-center gap-2 text-sm text-zinc-300">
+                    <input
+                      type="checkbox"
+                      checked={product.active}
+                      onChange={(e) => changeProduct(product.id, "active", e.target.checked)}
+                    />
+                    Active product
+                  </label>
+
+                  <input
+                    className="mt-4 w-full rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-white"
+                    type="file"
+                    accept=".txt"
+                    onChange={(e) => {
+                      const selected = e.target.files?.[0];
+                      if (selected) addTxtToProduct(product, selected);
+                    }}
+                  />
+
+                  <button
+                    onClick={() => updateProduct(product)}
+                    className="mt-4 w-full rounded-xl bg-violet-600 px-4 py-3 text-sm font-semibold uppercase tracking-[0.15em] hover:bg-violet-500"
+                  >
+                    Save Changes
+                  </button>
                 </div>
-
-                <button onClick={() => toggleProduct(product)} className="mt-5 w-full rounded-xl border border-white/10 px-4 py-3 text-sm hover:bg-white/5">
-                  {product.active ? "Deactivate" : "Activate"}
-                </button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </section>
       </section>
