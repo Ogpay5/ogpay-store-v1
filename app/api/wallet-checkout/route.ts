@@ -6,8 +6,8 @@ const admin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
-const client = (token: string) =>
-  createClient(
+function userClient(token: string) {
+  return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
@@ -18,36 +18,33 @@ const client = (token: string) =>
       },
     }
   );
+}
 
 export async function POST(req: Request) {
   try {
     const authHeader = req.headers.get("authorization");
 
     if (!authHeader) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const userClient = client(authHeader);
+    const auth = userClient(authHeader);
 
-    const {
-      data: { user },
-    } = await userClient.auth.getUser();
+    const { data: userData } = await auth.auth.getUser();
 
-    if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+    if (!userData.user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
+
+    const userId = userData.user.id;
 
     const { data: profile } = await admin
       .from("profiles")
       .select("balance")
-      .eq("id", user.id)
+      .eq("id", userId)
       .single();
+
+    const balance = Number(profile?.balance || 0);
 
     const { data: cartItems } = await admin
       .from("cart_items")
@@ -62,54 +59,71 @@ export async function POST(req: Request) {
           stock_count
         )
       `)
-      .eq("user_id", user.id);
+      .eq("user_id", userId);
 
     if (!cartItems || cartItems.length === 0) {
-      return NextResponse.json(
-        { error: "Cart is empty" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Cart is empty" }, { status: 400 });
     }
 
     let total = 0;
 
     for (const item of cartItems as any[]) {
-      total +=
-        Number(item.product.price_per_pack) *
-        Number(item.quantity_packs);
+      total += Number(item.product.price_per_pack) * Number(item.quantity_packs);
     }
 
-    const balance = Number(profile?.balance || 0);
-
     if (balance < total) {
+      return NextResponse.json({ error: "Insufficient balance" }, { status: 400 });
+    }
+
+    const orderCode =
+      "OG-" +
+      crypto.randomUUID().replace(/-/g, "").slice(0, 8).toUpperCase();
+
+    const { data: order, error: orderError } = await admin
+      .from("orders")
+      .insert({
+        user_id: userId,
+        total_price: total,
+        paid: true,
+        delivered: true,
+        status: "delivered",
+        order_code: orderCode,
+      })
+      .select()
+      .single();
+
+    if (orderError || !order) {
       return NextResponse.json(
-        { error: "Insufficient balance" },
+        { error: orderError?.message || "Could not create order" },
         { status: 400 }
       );
     }
 
-    const deliveredLines: string[] = [];
+    let totalDelivered = 0;
+    const allDeliveredParts: string[] = [];
 
     for (const item of cartItems as any[]) {
-      const needed =
-        Number(item.product.lines_per_pack) *
-        Number(item.quantity_packs);
+      const product = item.product;
+      const quantityPacks = Number(item.quantity_packs);
+      const linesPerPack = Number(product.lines_per_pack);
+      const needed = quantityPacks * linesPerPack;
 
       const { data: lines } = await admin
         .from("product_lines")
         .select("id, content")
-        .eq("product_id", item.product.id)
+        .eq("product_id", product.id)
         .eq("sold", false)
         .limit(needed);
 
       if (!lines || lines.length < needed) {
         return NextResponse.json(
-          { error: `Insufficient stock for ${item.product.title}` },
+          { error: `Insufficient stock for ${product.title}` },
           { status: 400 }
         );
       }
 
-      const ids = lines.map((line) => line.id);
+      const deliveredContent = lines.map((line) => line.content).join("\n");
+      const lineIds = lines.map((line) => line.id);
 
       await admin
         .from("product_lines")
@@ -117,69 +131,66 @@ export async function POST(req: Request) {
           sold: true,
           sold_at: new Date().toISOString(),
         })
-        .in("id", ids);
+        .in("id", lineIds);
+
+      const newStock = Number(product.stock_count) - needed;
 
       await admin
         .from("products")
         .update({
-          stock_count:
-            Number(item.product.stock_count) - needed,
+          stock_count: newStock,
+          active: newStock >= linesPerPack,
         })
-        .eq("id", item.product.id);
+        .eq("id", product.id);
 
-      deliveredLines.push(
-        ...lines.map((line) => line.content)
+      await admin.from("order_items").insert({
+        order_id: order.id,
+        product_id: product.id,
+        product_title: product.title,
+        quantity_packs: quantityPacks,
+        lines_per_pack: linesPerPack,
+        total_lines: needed,
+        delivered_content: deliveredContent,
+      });
+
+      totalDelivered += needed;
+
+      allDeliveredParts.push(
+        `PRODUCT: ${product.title}\n` +
+          `PACKS: ${quantityPacks}\n` +
+          `LINES: ${needed}\n\n` +
+          deliveredContent
       );
     }
-
-    const newBalance = balance - total;
 
     await admin
       .from("profiles")
       .update({
-        balance: newBalance,
+        balance: balance - total,
       })
-      .eq("id", user.id);
+      .eq("id", userId);
+
+    await admin.from("wallet_transactions").insert({
+      user_id: userId,
+      type: "purchase",
+      amount: -total,
+      note: `Purchase ${orderCode}`,
+    });
 
     await admin
-      .from("wallet_transactions")
-      .insert({
-        user_id: user.id,
-        type: "purchase",
-        amount: -total,
-        note: "Wallet checkout purchase",
-      });
-
-    const orderCode =
-      "OG-" +
-      crypto.randomUUID()
-        .replace(/-/g, "")
-        .slice(0, 8)
-        .toUpperCase();
-
-    const { data: order } = await admin
       .from("orders")
-      .insert({
-        user_id: user.id,
-        total_price: total,
-        status: "delivered",
-        paid: true,
-        delivered: true,
-        delivered_content: deliveredLines.join("\n"),
-        order_code: orderCode,
+      .update({
+        delivered_content: allDeliveredParts.join("\n\n--------------------\n\n"),
       })
-      .select()
-      .single();
+      .eq("id", order.id);
 
-    await admin
-      .from("cart_items")
-      .delete()
-      .eq("user_id", user.id);
+    await admin.from("cart_items").delete().eq("user_id", userId);
 
     return NextResponse.json({
       success: true,
+      orderCode,
       total,
-      delivered: deliveredLines.length,
+      delivered: totalDelivered,
     });
   } catch (error) {
     return NextResponse.json(
