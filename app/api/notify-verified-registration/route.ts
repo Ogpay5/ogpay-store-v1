@@ -53,7 +53,7 @@ export async function POST(req: Request) {
 
     await resend.emails.send({
       from: "OGPAYTRUE <support@ogpaytrue.org>",
-      to: "TUEMAIL@gmail.com",
+      to: "ogpayllc@ogpaytrue.org",
       subject: "Verified User Waiting For Approval",
       html: `
         <div style="background:#050505;padding:40px;font-family:Arial;color:white">
