@@ -125,19 +125,19 @@ export default function LoginPage() {
         </div>
       </section>
     
-      <div className="fixed bottom-5 right-5 z-50 hidden max-w-sm rounded-2xl border border-amber-500/20 bg-[#0a0a0a]/95 p-5 shadow-[0_0_40px_rgba(251,191,36,0.12)] backdrop-blur-xl md:block">
-        <p className="text-xs uppercase tracking-[0.25em] text-amber-300">
+      <div className="fixed bottom-4 left-4 right-4 z-50 rounded-2xl border border-amber-500/20 bg-[#0a0a0a]/95 p-4 shadow-[0_0_40px_rgba(251,191,36,0.12)] backdrop-blur-xl md:left-auto md:right-5 md:max-w-sm md:p-5">
+        <p className="text-[11px] uppercase tracking-[0.2em] text-amber-300 md:text-xs md:tracking-[0.25em]">
           Privacy Notice • Aviso
         </p>
 
-        <div className="mt-3 space-y-3">
-          <p className="text-sm leading-6 text-zinc-200">
+        <div className="mt-3 grid gap-3 md:space-y-3">
+          <p className="text-xs leading-5 text-zinc-200 md:text-sm md:leading-6">
             New client registrations require manual admin approval before access is granted.
           </p>
 
           <div className="h-px bg-white/10"></div>
 
-          <p className="text-sm leading-6 text-zinc-400">
+          <p className="text-xs leading-5 text-zinc-400 md:text-sm md:leading-6">
             Los nuevos registros requieren aprobación manual del administrador antes de otorgar acceso.
           </p>
         </div>
