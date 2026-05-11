@@ -99,7 +99,7 @@ export async function POST(req: Request) {
         .from("product_lines")
         .select("id, content")
         .eq("product_id", item.product.id)
-        .eq("used", false)
+        .eq("sold", false)
         .limit(needed);
 
       if (!lines || lines.length < needed) {
@@ -114,8 +114,8 @@ export async function POST(req: Request) {
       await admin
         .from("product_lines")
         .update({
-          used: true,
-          used_by: user.id,
+          sold: true,
+          sold_at: new Date().toISOString(),
         })
         .in("id", ids);
 
