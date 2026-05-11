@@ -42,7 +42,7 @@ export default function HomePage() {
           </div>
 
           <div className="mx-auto mt-16 grid max-w-2xl gap-6 sm:grid-cols-2">
-            <a href="/login" className="rounded-xl bg-violet-600 px-10 py-5 text-center text-lg font-semibold uppercase tracking-[0.25em] text-white shadow-[0_0_32px_rgba(124,58,237,0.35)] transition hover:bg-violet-500">
+            <a href="/register" className="rounded-xl bg-violet-600 px-10 py-5 text-center text-lg font-semibold uppercase tracking-[0.25em] text-white shadow-[0_0_32px_rgba(124,58,237,0.35)] transition hover:bg-violet-500">
               Register
             </a>
 
