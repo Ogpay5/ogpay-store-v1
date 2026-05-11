@@ -34,6 +34,26 @@ export default function RegisterPage() {
         role: "client",
         balance: 0,
       });
+
+      const notifyResponse = await fetch("/api/admin-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          subject: "New OGPAYTRUE Registration",
+          message: `
+            <p>A new user registration is waiting for approval.</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Panel:</strong> https://ogpaytrue.org/admin</p>
+          `,
+        }),
+      });
+
+      if (!notifyResponse.ok) {
+        const notifyError = await notifyResponse.json();
+        console.error("Admin email failed:", notifyError);
+      }
     }
 
     alert("Account created. Check your email to verify your account.");
