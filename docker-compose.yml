@@ -1,0 +1,11 @@
+services:
+  web:
+    build: .
+    container_name: portal-clientes-web
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    working_dir: /app
+    stdin_open: true
+    tty: true
