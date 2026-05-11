@@ -69,7 +69,7 @@ export default function WalletPage() {
     }
 
     if (data.invoice_url) {
-      window.open(data.invoice_url, "_blank");
+      window.location.href = data.invoice_url;
     } else if (data.pay_address) {
       alert(
         `Send payment to:\n\n${data.pay_address}`
