@@ -38,9 +38,15 @@ export default function HomePage() {
                 ₿
               </div>
 
-              <span className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-                Bitcoin
-              </span>
+              <div className="text-center">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-400">
+                  Bitcoin
+                </p>
+
+                <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.25em] text-orange-400">
+                  BTC
+                </p>
+              </div>
             </div>
 
             <div className="flex flex-col items-center gap-3">
@@ -48,9 +54,15 @@ export default function HomePage() {
                 Ξ
               </div>
 
-              <span className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-                Ethereum
-              </span>
+              <div className="text-center">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-400">
+                  Ethereum
+                </p>
+
+                <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.25em] text-zinc-500">
+                  ETH
+                </p>
+              </div>
             </div>
 
             <div className="flex flex-col items-center gap-3">
@@ -58,20 +70,42 @@ export default function HomePage() {
                 ₮
               </div>
 
-              <span className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-                USDT
-              </span>
+              <div className="text-center">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-400">
+                  USDT
+                </p>
+
+                <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.25em] text-emerald-400">
+                  USDT
+                </p>
+              </div>
             </div>
 
             <div className="flex flex-col items-center gap-3">
               <div className="grid h-16 w-16 place-items-center rounded-full border border-blue-400/30 bg-blue-500 text-3xl font-black text-white shadow-[0_0_35px_rgba(59,130,246,0.3)]">
-                $
+                Ł
               </div>
 
-              <span className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">
-                USDC
-              </span>
+              <div className="text-center">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-400">
+                  Litecoin
+                </p>
+
+                <p className="mt-1 text-[10px] font-bold uppercase tracking-[0.25em] text-blue-400">
+                  LTC
+                </p>
+              </div>
             </div>
+          </div>
+
+          <div className="mx-auto mt-10 max-w-xl rounded-3xl border border-violet-500/20 bg-black/30 p-6 backdrop-blur-xl">
+            <p className="text-sm uppercase tracking-[0.35em] text-zinc-300">
+              And many more...
+            </p>
+
+            <p className="mt-4 text-sm leading-7 text-zinc-500">
+              We support multiple cryptocurrencies across secure private infrastructure.
+            </p>
           </div>
 
           <div className="mx-auto mt-14 grid max-w-2xl gap-5">
