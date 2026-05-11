@@ -15,6 +15,7 @@ type Product = {
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [email, setEmail] = useState("");
+  const [balance, setBalance] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
@@ -31,7 +32,7 @@ export default function DashboardPage() {
 
     const { data: profile } = await supabase
       .from("profiles")
-      .select("email, approved")
+      .select("email, approved, balance")
       .eq("id", user.id)
       .single();
 
@@ -43,6 +44,7 @@ export default function DashboardPage() {
     }
 
     setEmail(profile.email);
+    setBalance(profile.balance || 0);
 
     const { data } = await supabase
       .from("products")
@@ -67,28 +69,18 @@ export default function DashboardPage() {
       .maybeSingle();
 
     if (existing) {
-      const { error } = await supabase
+      await supabase
         .from("cart_items")
         .update({ quantity_packs: existing.quantity_packs + 1 })
         .eq("id", existing.id);
-
-      if (error) {
-        alert(error.message);
-        return;
-      }
     } else {
-      const { error } = await supabase
+      await supabase
         .from("cart_items")
         .insert({
           user_id: user.id,
           product_id: productId,
           quantity_packs: 1,
         });
-
-      if (error) {
-        alert(error.message);
-        return;
-      }
     }
 
     alert("Product added to cart.");
@@ -102,9 +94,7 @@ export default function DashboardPage() {
   if (loading) {
     return (
       <main className="min-h-screen bg-[#050505] text-white flex items-center justify-center">
-        <p className="text-zinc-400 tracking-[0.3em] uppercase">
-          Loading...
-        </p>
+        <p className="text-zinc-400 tracking-[0.3em] uppercase">Loading...</p>
       </main>
     );
   }
@@ -121,9 +111,7 @@ export default function DashboardPage() {
       <header className="relative z-10 border-b border-white/10 bg-black/20 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
           <a href="/" className="text-2xl font-black tracking-[0.14em]">
-            <span className="bg-gradient-to-r from-violet-500 to-violet-300 bg-clip-text text-transparent">
-              OG
-            </span>
+            <span className="bg-gradient-to-r from-violet-500 to-violet-300 bg-clip-text text-transparent">OG</span>
             <span className="text-zinc-100">PAYTRUE</span>
           </a>
 
@@ -148,12 +136,26 @@ export default function DashboardPage() {
               <p className="text-sm uppercase tracking-[0.35em] text-emerald-300">
                 24/7 ACTIVE
               </p>
+
               <h1 className="mt-4 text-4xl font-bold md:text-5xl">
                 Client Dashboard
               </h1>
+
               <p className="mt-4 text-zinc-400">
                 Logged in as {email}
               </p>
+
+              <div className="mt-6 inline-flex items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-6 py-4">
+                <div>
+                  <p className="text-xs uppercase tracking-[0.25em] text-zinc-400">
+                    Wallet Balance
+                  </p>
+
+                  <p className="mt-1 text-3xl font-bold text-emerald-300">
+                    ${balance.toFixed(2)}
+                  </p>
+                </div>
+              </div>
             </div>
 
             <div className="rounded-2xl border border-violet-500/20 bg-violet-500/10 px-6 py-4">
@@ -168,32 +170,21 @@ export default function DashboardPage() {
         </div>
 
         <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">
-            Available Products
-          </h2>
-          <p className="text-sm text-zinc-500">
-            {products.length} products
-          </p>
+          <h2 className="text-2xl font-bold">Available Products</h2>
+          <p className="text-sm text-zinc-500">{products.length} products</p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {products.map((product) => {
-            const availablePacks = Math.floor(
-              product.stock_count / product.lines_per_pack
-            );
+            const availablePacks = Math.floor(product.stock_count / product.lines_per_pack);
 
             return (
-              <div
-                key={product.id}
-                className="rounded-[1.5rem] border border-white/10 bg-black/35 p-6 shadow-2xl backdrop-blur-xl transition hover:border-violet-500/40"
-              >
+              <div key={product.id} className="rounded-[1.5rem] border border-white/10 bg-black/35 p-6 shadow-2xl backdrop-blur-xl transition hover:border-violet-500/40">
                 <div className="mb-5 flex items-start justify-between gap-4">
-                  <h3 className="text-2xl font-bold">
-                    {product.title}
-                  </h3>
+                  <h3 className="text-2xl font-bold">{product.title}</h3>
 
                   <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300">
-                    In Stock
+                    {availablePacks > 0 ? "In Stock" : "Out"}
                   </span>
                 </div>
 
@@ -203,21 +194,13 @@ export default function DashboardPage() {
 
                 <div className="mt-6 grid grid-cols-2 gap-4">
                   <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                    <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
-                      Price
-                    </p>
-                    <p className="mt-2 text-2xl font-bold">
-                      ${product.price_per_pack}
-                    </p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Price</p>
+                    <p className="mt-2 text-2xl font-bold">${product.price_per_pack}</p>
                   </div>
 
                   <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                    <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">
-                      Pack
-                    </p>
-                    <p className="mt-2 text-2xl font-bold">
-                      {product.lines_per_pack}
-                    </p>
+                    <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Pack</p>
+                    <p className="mt-2 text-2xl font-bold">{product.lines_per_pack}</p>
                   </div>
                 </div>
 
