@@ -50,6 +50,15 @@ export default function HomePage() {
               Login
             </a>
           </div>
+        
+          <a
+            href="https://t.me/+93kGa-c_OF85ZTQ5"
+            target="_blank"
+            className="mt-6 flex items-center justify-center rounded-2xl border border-sky-500/20 bg-sky-500/10 px-6 py-5 text-center text-sm font-semibold uppercase tracking-[0.25em] text-sky-300 transition hover:bg-sky-500/20"
+          >
+            Join Official Telegram
+          </a>
+
         </div>
       </section>
     </main>
