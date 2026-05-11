@@ -150,12 +150,20 @@ export async function POST(req: Request) {
         note: "Wallet checkout purchase",
       });
 
+    const orderCode =
+      "OG-" +
+      crypto.randomUUID()
+        .replace(/-/g, "")
+        .slice(0, 8)
+        .toUpperCase();
+
     const { data: order } = await admin
       .from("orders")
       .insert({
         user_id: user.id,
         total_amount: total,
         status: "completed",
+        order_code: orderCode,
       })
       .select()
       .single();
