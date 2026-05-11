@@ -150,17 +150,31 @@ export default function OrdersPage() {
                             </div>
 
                             {hasDelivery ? (
-                              <button
-                                onClick={() =>
-                                  downloadTxt(
-                                    item.delivered_content!,
-                                    `${code}-${item.product_title}.txt`
-                                  )
-                                }
-                                className="rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white hover:bg-violet-500"
-                              >
-                                Download TXT
-                              </button>
+                              <div className="flex flex-wrap gap-3">
+                                <button
+                                  onClick={() =>
+                                    downloadTxt(
+                                      item.delivered_content!,
+                                      `${code}-${item.product_title}.txt`
+                                    )
+                                  }
+                                  className="rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white hover:bg-violet-500"
+                                >
+                                  Download TXT
+                                </button>
+
+                                <button
+                                  onClick={() => {
+                                    navigator.clipboard.writeText(
+                                      item.delivered_content || ""
+                                    );
+                                    alert("Copied to clipboard.");
+                                  }}
+                                  className="rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-zinc-300 hover:bg-white/5"
+                                >
+                                  Copy
+                                </button>
+                              </div>
                             ) : (
                               <span className="text-sm text-zinc-500">Pending</span>
                             )}

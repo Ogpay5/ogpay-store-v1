@@ -90,12 +90,34 @@ export default function AdminOrdersPage() {
                         </p>
 
                         {item.delivered_content && (
+                          <div className="mt-4 flex flex-wrap gap-3">
                           <button
                             onClick={() => downloadTxt(item.delivered_content, `${code}-${item.product_title}.txt`)}
-                            className="mt-4 rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white hover:bg-violet-500"
+                            className="rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white hover:bg-violet-500"
                           >
                             Download TXT
                           </button>
+
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(item.delivered_content || "");
+                              alert("Copied to clipboard.");
+                            }}
+                            className="rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-zinc-300 hover:bg-white/5"
+                          >
+                            Copy
+                          </button>
+                        </div>
+
+                        <details className="mt-4">
+                          <summary className="cursor-pointer text-sm text-violet-300">
+                            Preview delivery
+                          </summary>
+
+                          <pre className="mt-4 max-h-52 overflow-auto whitespace-pre-wrap rounded-xl bg-black/50 p-4 text-sm text-zinc-300">
+{item.delivered_content}
+                          </pre>
+                        </details>
                         )}
                       </div>
                     ))}

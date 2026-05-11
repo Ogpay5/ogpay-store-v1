@@ -328,7 +328,14 @@ export default function AdminPage() {
           <a href="/dashboard" className="rounded-xl border border-white/10 px-5 py-3 text-sm text-zinc-300 hover:bg-white/5">
             Dashboard
           </a>
-        </div>
+        
+          <a
+            href="/admin/analytics"
+            className="rounded-2xl border border-violet-500/30 bg-violet-500/10 px-6 py-4 text-lg font-semibold text-violet-300 hover:bg-violet-500/20"
+          >
+            Analytics
+          </a>
+</div>
 
         <div className="grid gap-8 xl:grid-cols-2">
           <section className="rounded-[2rem] border border-white/10 bg-black/35 p-8 backdrop-blur-xl">
