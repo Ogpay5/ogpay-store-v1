@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 
@@ -6,9 +7,35 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+function verifySignature(
+  body: string,
+  signature: string
+) {
+  const secret = process.env.NOWPAYMENTS_IPN_SECRET!;
+
+  const hmac = crypto
+    .createHmac("sha512", secret)
+    .update(body)
+    .digest("hex");
+
+  return hmac === signature;
+}
+
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const rawBody = await req.text();
+
+    const signature =
+      req.headers.get("x-nowpayments-sig") || "";
+
+    if (!verifySignature(rawBody, signature)) {
+      return NextResponse.json(
+        { error: "Invalid signature" },
+        { status: 401 }
+      );
+    }
+
+    const body = JSON.parse(rawBody);
 
     const paymentStatus = body.payment_status;
     const orderId = body.order_id;
