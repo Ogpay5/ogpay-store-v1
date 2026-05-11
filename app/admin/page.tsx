@@ -153,8 +153,38 @@ export default function AdminPage() {
       .map((line) => line.trim())
       .filter((line) => line.length > 0);
 
-    if (lines.length < Number(linesPerPack)) {
+    const linesPerPackValue = Number(linesPerPack);
+    const pricePerPackValue = Number(pricePerPack);
+
+    if (!linesPerPackValue || linesPerPackValue <= 0) {
+      alert("Invalid lines per pack.");
+      return;
+    }
+
+    if (!pricePerPackValue || pricePerPackValue <= 0) {
+      alert("Invalid price.");
+      return;
+    }
+
+    if (lines.length < linesPerPackValue) {
       alert("TXT does not have enough lines.");
+      return;
+    }
+
+    const availablePacks = Math.floor(
+      lines.length / linesPerPackValue
+    );
+
+    const confirmCreate = confirm(
+      `Product Summary\n\n` +
+      `Lines Loaded: ${lines.length}\n` +
+      `Lines Per Pack: ${linesPerPackValue}\n` +
+      `Available Packs: ${availablePacks}\n` +
+      `Price Per Pack: $${pricePerPackValue}\n\n` +
+      `Create product?`
+    );
+
+    if (!confirmCreate) {
       return;
     }
 
@@ -163,8 +193,8 @@ export default function AdminPage() {
       .insert({
         title,
         description,
-        price_per_pack: Number(pricePerPack),
-        lines_per_pack: Number(linesPerPack),
+        price_per_pack: pricePerPackValue,
+        lines_per_pack: linesPerPackValue,
         stock_count: lines.length,
         active: true,
       })
