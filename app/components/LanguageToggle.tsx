@@ -2,44 +2,90 @@
 
 import { useEffect, useState } from "react";
 
+const dictionary: Record<string, string> = {
+  "Register": "Registrarse",
+  "Login": "Iniciar sesión",
+  "CREATE YOUR ACCOUNT": "CREA TU CUENTA",
+  "Already have an account? Login": "¿Ya tienes cuenta? Inicia sesión",
+  "Email": "Correo",
+  "Password": "Contraseña",
+  "Privacy Notice": "Aviso de privacidad",
+  "New client registrations require manual admin approval after email verification before access is granted.":
+    "Los nuevos registros requieren aprobación manual del administrador después de verificar el correo electrónico.",
+  "Client Dashboard": "Panel del cliente",
+  "Wallet Balance": "Saldo disponible",
+  "Available Balance": "Saldo disponible",
+  "Add Funds": "Agregar fondos",
+  "Cart": "Carrito",
+  "Orders": "Órdenes",
+  "Wallet": "Billetera",
+  "Logout": "Cerrar sesión",
+  "Products Available": "Productos disponibles",
+  "Active Platform": "Plataforma activa",
+  "Featured Products": "Productos disponibles",
+  "Add to Cart": "Agregar al carrito",
+  "Pay With Wallet": "Pagar con saldo",
+  "Order History": "Historial de órdenes",
+  "Download TXT": "Descargar TXT",
+  "Preview delivery": "Ver entrega",
+  "Copy": "Copiar",
+};
+
 export default function LanguageToggle() {
   const [lang, setLang] = useState("en");
 
-  useEffect(() => {
-    const saved = localStorage.getItem("og-language");
+  function translate(to: string) {
+    const walker = document.createTreeWalker(
+      document.body,
+      NodeFilter.SHOW_TEXT
+    );
 
-    if (saved) {
-      setLang(saved);
-      document.documentElement.lang = saved;
-      translate(saved);
+    const nodes: Text[] = [];
+
+    while (walker.nextNode()) {
+      nodes.push(walker.currentNode as Text);
     }
-  }, []);
 
-  function translate(language: string) {
-    const elements = document.querySelectorAll("[data-es]");
+    nodes.forEach((node) => {
+      const original =
+        node.parentElement?.getAttribute("data-original-text") ||
+        node.textContent ||
+        "";
 
-    elements.forEach((el) => {
-      const html = el as HTMLElement;
+      const clean = original.trim();
 
-      const en = html.getAttribute("data-en");
-      const es = html.getAttribute("data-es");
+      if (!clean) return;
 
-      html.innerText = language === "es"
-        ? es || ""
-        : en || "";
+      if (!node.parentElement?.getAttribute("data-original-text")) {
+        node.parentElement?.setAttribute("data-original-text", original);
+      }
+
+      if (to === "es" && dictionary[clean]) {
+        node.textContent = original.replace(clean, dictionary[clean]);
+      }
+
+      if (to === "en") {
+        node.textContent = original;
+      }
     });
   }
 
+  useEffect(() => {
+    const saved = localStorage.getItem("og-language") || "en";
+    setLang(saved);
+
+    setTimeout(() => {
+      translate(saved);
+    }, 300);
+  }, []);
+
   function toggle() {
-    const newLang = lang === "en" ? "es" : "en";
+    const next = lang === "en" ? "es" : "en";
 
-    setLang(newLang);
+    setLang(next);
+    localStorage.setItem("og-language", next);
 
-    localStorage.setItem("og-language", newLang);
-
-    document.documentElement.lang = newLang;
-
-    translate(newLang);
+    translate(next);
   }
 
   return (
