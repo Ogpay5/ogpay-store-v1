@@ -21,6 +21,7 @@ export default function HomePage() {
             <span className="bg-gradient-to-r from-violet-500 to-violet-300 bg-clip-text text-transparent">
               OG
             </span>
+
             <span className="text-zinc-100 drop-shadow-[0_0_24px_rgba(255,255,255,0.22)]">
               PAYTRUE
             </span>
@@ -29,7 +30,7 @@ export default function HomePage() {
           <div className="mx-auto mt-9 h-1 w-16 rounded-full bg-violet-500 shadow-[0_0_24px_rgba(139,92,246,0.95)]" />
 
           <p className="mt-9 text-center text-xs font-medium uppercase tracking-[0.35em] text-zinc-400 md:text-sm md:tracking-[0.5em]">
-            We accept crypto
+            WE ACCEPT CRYPTO
           </p>
 
           <div className="mt-10 flex items-center justify-center gap-5">
@@ -99,23 +100,63 @@ export default function HomePage() {
           </div>
 
           <div className="mx-auto mt-10 max-w-xl rounded-3xl border border-violet-500/20 bg-black/30 p-6 backdrop-blur-xl">
-            <p className="text-sm uppercase tracking-[0.35em] text-zinc-300">
-              And many more...
-            </p>
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-3xl text-violet-400">
+                ✦
+              </span>
 
-            <p className="mt-4 text-sm leading-7 text-zinc-500">
-              We support multiple cryptocurrencies across secure private infrastructure.
-            </p>
+              <p className="text-sm uppercase tracking-[0.35em] text-zinc-300">
+                AND MANY MORE...
+              </p>
+            </div>
+
+            <div className="mt-5 flex items-center justify-center gap-3">
+              <span className="h-2 w-2 rounded-full bg-zinc-700" />
+              <span className="h-2 w-2 rounded-full bg-violet-500 shadow-[0_0_18px_rgba(139,92,246,0.9)]" />
+              <span className="h-2 w-2 rounded-full bg-zinc-700" />
+            </div>
           </div>
 
           <div className="mx-auto mt-14 grid max-w-2xl gap-5">
-            <a href="/register" className="rounded-2xl bg-violet-600 px-8 py-5 text-center text-base font-bold uppercase tracking-[0.3em] text-white shadow-[0_0_32px_rgba(124,58,237,0.35)] transition hover:bg-violet-500 md:text-lg">
+            <a
+              href="/register"
+              className="rounded-2xl bg-violet-600 px-8 py-5 text-center text-base font-bold uppercase tracking-[0.3em] text-white shadow-[0_0_32px_rgba(124,58,237,0.35)] transition hover:bg-violet-500 md:text-lg"
+            >
               Register
             </a>
 
-            <a href="/login" className="rounded-2xl border border-violet-500/70 bg-black/20 px-8 py-5 text-center text-base font-bold uppercase tracking-[0.3em] text-white backdrop-blur-md transition hover:bg-violet-500/10 md:text-lg">
+            <a
+              href="/login"
+              className="rounded-2xl border border-violet-500/70 bg-black/20 px-8 py-5 text-center text-base font-bold uppercase tracking-[0.3em] text-white backdrop-blur-md transition hover:bg-violet-500/10 md:text-lg"
+            >
               Login
             </a>
+          </div>
+
+          <div className="mt-14 flex items-center justify-center gap-4 text-xs uppercase tracking-[0.25em] text-zinc-500">
+            <span className="text-violet-500">
+              🔒
+            </span>
+
+            <span>
+              Secure
+            </span>
+
+            <span className="text-violet-500">
+              •
+            </span>
+
+            <span>
+              Private
+            </span>
+
+            <span className="text-violet-500">
+              •
+            </span>
+
+            <span>
+              Reliable
+            </span>
           </div>
         </div>
       </section>
