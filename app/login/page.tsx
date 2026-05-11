@@ -18,6 +18,17 @@ export default function LoginPage() {
       return;
     }
 
+    const { data: sessionData } = await supabase.auth.getSession();
+
+    if (sessionData.session?.access_token) {
+      await fetch("/api/notify-verified-registration", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${sessionData.session.access_token}`,
+        },
+      });
+    }
+
     window.location.href = "/dashboard";
   }
 
