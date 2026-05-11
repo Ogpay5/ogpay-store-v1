@@ -57,6 +57,20 @@ export default function CartPage() {
     setLoading(false);
   }
 
+  async function updateQuantity(id: string, quantity: number) {
+    if (quantity <= 0) {
+      await removeItem(id);
+      return;
+    }
+
+    await supabase
+      .from("cart_items")
+      .update({ quantity_packs: quantity })
+      .eq("id", id);
+
+    loadCart();
+  }
+
   async function removeItem(id: string) {
     await supabase.from("cart_items").delete().eq("id", id);
     loadCart();
@@ -120,13 +134,8 @@ export default function CartPage() {
         </div>
 
         <div className="mb-8 rounded-[2rem] border border-emerald-500/20 bg-emerald-500/10 p-8">
-          <p className="text-sm uppercase tracking-[0.35em] text-zinc-400">
-            Wallet Balance
-          </p>
-
-          <h2 className="mt-4 text-5xl font-black text-emerald-300">
-            ${balance.toFixed(2)}
-          </h2>
+          <p className="text-sm uppercase tracking-[0.35em] text-zinc-400">Wallet Balance</p>
+          <h2 className="mt-4 text-5xl font-black text-emerald-300">${balance.toFixed(2)}</h2>
 
           <a href="/wallet" className="mt-5 inline-block rounded-xl bg-emerald-600 px-6 py-3 font-semibold uppercase tracking-[0.18em] text-white hover:bg-emerald-500">
             Add Funds
@@ -137,21 +146,42 @@ export default function CartPage() {
           <h2 className="text-3xl font-bold">Cart Items</h2>
 
           <div className="mt-8 space-y-5">
-            {items.length === 0 && (
-              <p className="text-zinc-500">Your cart is empty.</p>
-            )}
+            {items.length === 0 && <p className="text-zinc-500">Your cart is empty.</p>}
 
             {items.map((item) => (
               <div key={item.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
                 <div className="flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
                   <div>
                     <h3 className="text-2xl font-bold">{item.product.title}</h3>
-                    <p className="mt-3 text-zinc-400">Packs: {item.quantity_packs}</p>
-                    <p className="text-zinc-400">Lines per pack: {item.product.lines_per_pack}</p>
+                    <p className="mt-3 text-zinc-400">Lines per pack: {item.product.lines_per_pack}</p>
                     <p className="text-zinc-400">Price per pack: ${item.product.price_per_pack}</p>
                   </div>
 
                   <div className="flex flex-col items-end gap-4">
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity_packs - 1)}
+                        className="grid h-11 w-11 place-items-center rounded-xl border border-white/10 text-xl hover:bg-white/5"
+                      >
+                        -
+                      </button>
+
+                      <input
+                        type="number"
+                        min="1"
+                        value={item.quantity_packs}
+                        onChange={(e) => updateQuantity(item.id, Number(e.target.value || 1))}
+                        className="h-11 w-24 rounded-xl border border-white/10 bg-black/30 text-center text-white outline-none focus:border-violet-500"
+                      />
+
+                      <button
+                        onClick={() => updateQuantity(item.id, item.quantity_packs + 1)}
+                        className="grid h-11 w-11 place-items-center rounded-xl border border-white/10 text-xl hover:bg-white/5"
+                      >
+                        +
+                      </button>
+                    </div>
+
                     <p className="text-3xl font-bold">
                       ${(Number(item.product.price_per_pack) * Number(item.quantity_packs)).toFixed(2)}
                     </p>
@@ -167,13 +197,8 @@ export default function CartPage() {
 
           {items.length > 0 && (
             <div className="mt-10 rounded-2xl border border-violet-500/20 bg-violet-500/10 p-8">
-              <p className="text-sm uppercase tracking-[0.35em] text-zinc-400">
-                Total
-              </p>
-
-              <h2 className="mt-3 text-5xl font-black">
-                ${total.toFixed(2)}
-              </h2>
+              <p className="text-sm uppercase tracking-[0.35em] text-zinc-400">Total</p>
+              <h2 className="mt-3 text-5xl font-black">${total.toFixed(2)}</h2>
 
               <p className={`mt-4 text-sm ${enoughBalance ? "text-emerald-300" : "text-red-300"}`}>
                 {enoughBalance ? "Sufficient wallet balance." : "Insufficient wallet balance."}
