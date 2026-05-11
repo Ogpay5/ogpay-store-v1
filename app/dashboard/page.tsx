@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ShoppingCart, Wallet, LogOut, Package, PlusCircle, Box, ShieldCheck } from "lucide-react";
 import { supabase } from "@/src/lib/supabase";
 
 type Product = {
@@ -110,22 +109,22 @@ export default function DashboardPage() {
 
           <nav className="flex items-center gap-3">
             <a href="/cart" className="flex items-center gap-2 rounded-2xl bg-violet-600 px-5 py-3 font-semibold hover:bg-violet-500">
-              <ShoppingCart size={20} />
+              🛒
               Cart
             </a>
 
             <a href="/orders" className="flex items-center gap-2 rounded-2xl border border-white/10 px-5 py-3 text-zinc-300 hover:bg-white/5">
-              <Package size={20} />
+              📦
               Orders
             </a>
 
             <a href="/wallet" className="flex items-center gap-2 rounded-2xl border border-white/10 px-5 py-3 text-zinc-300 hover:bg-white/5">
-              <Wallet size={20} />
+              💼
               Wallet
             </a>
 
             <button onClick={logout} className="flex items-center gap-2 rounded-2xl border border-white/10 px-5 py-3 text-zinc-300 hover:bg-white/5">
-              <LogOut size={20} />
+              🚪
               Logout
             </button>
           </nav>
@@ -155,7 +154,7 @@ export default function DashboardPage() {
               </div>
 
               <a href="/wallet" className="flex items-center justify-center gap-2 rounded-2xl bg-violet-600 px-7 py-4 font-semibold hover:bg-violet-500">
-                <PlusCircle size={22} />
+                +
                 Add Funds
               </a>
             </div>
@@ -164,7 +163,7 @@ export default function DashboardPage() {
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-8">
               <div className="mb-5 grid h-14 w-14 place-items-center rounded-2xl bg-violet-600/20 text-violet-300">
-                <Box size={28} />
+                📦
               </div>
               <h3 className="text-4xl font-black">{products.length}</h3>
               <p className="mt-2 text-zinc-400">Products Available</p>
@@ -172,7 +171,7 @@ export default function DashboardPage() {
 
             <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-8">
               <div className="mb-5 grid h-14 w-14 place-items-center rounded-2xl bg-emerald-500/20 text-emerald-300">
-                <ShieldCheck size={28} />
+                ✅
               </div>
               <h3 className="text-4xl font-black">24/7</h3>
               <p className="mt-2 text-zinc-400">Active Platform</p>
@@ -195,7 +194,7 @@ export default function DashboardPage() {
               return (
                 <div key={product.id} className="overflow-hidden rounded-3xl border border-white/10 bg-black/40">
                   <div className="grid h-36 place-items-center bg-gradient-to-br from-violet-950 via-black to-violet-900/40">
-                    <Package size={54} className="text-violet-300" />
+                    <span className="text-5xl">📦</span>
                   </div>
 
                   <div className="p-5">
@@ -223,7 +222,7 @@ export default function DashboardPage() {
                       disabled={packsAvailable <= 0}
                       className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl border border-violet-500/50 px-5 py-3 font-semibold text-violet-300 hover:bg-violet-500/10 disabled:cursor-not-allowed disabled:border-zinc-700 disabled:text-zinc-600"
                     >
-                      <ShoppingCart size={18} />
+                      🛒
                       Add to Cart
                     </button>
                   </div>
