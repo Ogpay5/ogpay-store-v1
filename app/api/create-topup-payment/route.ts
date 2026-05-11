@@ -11,6 +11,8 @@ export async function POST(req: Request) {
     );
   }
 
+  const topupId = crypto.randomUUID();
+
   const response = await fetch("https://api.nowpayments.io/v1/invoice", {
     method: "POST",
     headers: {
@@ -20,13 +22,11 @@ export async function POST(req: Request) {
     body: JSON.stringify({
       price_amount: amount,
       price_currency: "usd",
-      const topupId = crypto.randomUUID();
-
       order_id: `topup-${topupId}`,
       order_description: "OGPAYTRUE Wallet Topup",
       success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/wallet?topup=success`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/wallet?topup=cancel`,
-      ipn_callback_url: `${process.env.NEXT_PUBLIC_SITE_URL}/api/nowpayments-webhook`
+      ipn_callback_url: `${process.env.NEXT_PUBLIC_SITE_URL}/api/nowpayments-webhook`,
     }),
   });
 
