@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/src/lib/supabase";
-import toast from "react-hot-toast";
 
 type Product = {
   id: string;
@@ -86,7 +85,7 @@ export default function DashboardPage() {
         });
     }
 
-    toast.success("Product added to cart.");
+    alert("Product added to cart.");
   }
 
   async function logout() {

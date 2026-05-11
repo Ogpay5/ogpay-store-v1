@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/src/lib/supabase";
-import toast from "react-hot-toast";
 
 export default function AdminOrdersPage() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -48,7 +47,7 @@ export default function AdminOrdersPage() {
 
   function copyTxt(content: string) {
     navigator.clipboard.writeText(content || "");
-    toast.success("Copied to clipboard.");
+    alert("Copied to clipboard.");
   }
 
   if (loading) {

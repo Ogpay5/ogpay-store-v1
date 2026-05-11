@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/src/lib/supabase";
-import toast from "react-hot-toast";
 
 type OrderItem = {
   id: string;
@@ -59,7 +58,7 @@ export default function OrdersPage() {
       .order("created_at", { ascending: false });
 
     if (error) {
-      toast.error(error.message);
+      alert(error.message);
       setLoading(false);
       return;
     }
@@ -169,7 +168,7 @@ export default function OrdersPage() {
                                     navigator.clipboard.writeText(
                                       item.delivered_content || ""
                                     );
-                                    toast.success("Copied to clipboard.");
+                                    alert("Copied to clipboard.");
                                   }}
                                   className="rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-zinc-300 hover:bg-white/5"
                                 >
