@@ -17,6 +17,7 @@ export default function DashboardPage() {
   const [email, setEmail] = useState("");
   const [balance, setBalance] = useState(0);
   const [products, setProducts] = useState<Product[]>([]);
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
 
   useEffect(() => {
     loadDashboard();
@@ -67,10 +68,12 @@ export default function DashboardPage() {
       .eq("product_id", productId)
       .maybeSingle();
 
+    const quantityToAdd = Math.max(1, Number(quantities[productId] || 1));
+
     if (existing) {
       await supabase
         .from("cart_items")
-        .update({ quantity_packs: existing.quantity_packs + 1 })
+        .update({ quantity_packs: existing.quantity_packs + quantityToAdd })
         .eq("id", existing.id);
     } else {
       await supabase
@@ -78,7 +81,7 @@ export default function DashboardPage() {
         .insert({
           user_id: user.id,
           product_id: productId,
-          quantity_packs: 1,
+          quantity_packs: quantityToAdd,
         });
     }
 
@@ -225,14 +228,30 @@ export default function DashboardPage() {
                       {packsAvailable} packs available
                     </p>
 
-                    <button
-                      onClick={() => addToCart(product.id)}
-                      disabled={packsAvailable <= 0}
-                      className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl border border-violet-500/50 px-5 py-3 font-semibold text-violet-300 hover:bg-violet-500/10 disabled:cursor-not-allowed disabled:border-zinc-700 disabled:text-zinc-600"
-                    >
+                    <div className="mt-5 flex items-center gap-3">
+                      <input
+                        type="number"
+                        min="1"
+                        max={packsAvailable}
+                        value={quantities[product.id] || 1}
+                        onChange={(e) =>
+                          setQuantities({
+                            ...quantities,
+                            [product.id]: Math.max(1, Number(e.target.value || 1)),
+                          })
+                        }
+                        className="w-24 rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-center text-white outline-none focus:border-violet-500"
+                      />
+
+                      <button
+                        onClick={() => addToCart(product.id)}
+                        disabled={packsAvailable <= 0}
+                        className="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-violet-500/50 px-5 py-3 font-semibold text-violet-300 hover:bg-violet-500/10 disabled:cursor-not-allowed disabled:border-zinc-700 disabled:text-zinc-600"
+                      >
                       🛒
                       Add to Cart
-                    </button>
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
