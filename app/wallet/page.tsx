@@ -46,29 +46,36 @@ export default function WalletPage() {
   }
 
   async function createTopup() {
-    const { data: { user } } = await supabase.auth.getUser();
-
-    if (!user) return;
-
     if (!amount || Number(amount) <= 0) {
       alert("Invalid amount.");
       return;
     }
 
-    const { error } = await supabase
-      .from("topups")
-      .insert({
-        user_id: user.id,
+    const response = await fetch("/api/create-topup-payment", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
         amount: Number(amount),
-        currency: "USD",
-      });
+      }),
+    });
 
-    if (error) {
-      alert(error.message);
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.error || "Failed to create payment.");
       return;
     }
 
-    alert("Topup request created. Crypto integration coming next.");
+    if (data.invoice_url) {
+      window.open(data.invoice_url, "_blank");
+    } else if (data.pay_address) {
+      alert(
+        `Send payment to:\n\n${data.pay_address}`
+      );
+    }
+
     setAmount("");
   }
 
