@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ShoppingCart, Wallet, LogOut, Package, PlusCircle, Box, ShieldCheck } from "lucide-react";
 import { supabase } from "@/src/lib/supabase";
 
 type Product = {
@@ -44,7 +45,7 @@ export default function DashboardPage() {
     }
 
     setEmail(profile.email);
-    setBalance(profile.balance || 0);
+    setBalance(Number(profile.balance || 0));
 
     const { data } = await supabase
       .from("products")
@@ -58,7 +59,6 @@ export default function DashboardPage() {
 
   async function addToCart(productId: string) {
     const { data: { user } } = await supabase.auth.getUser();
-
     if (!user) return;
 
     const { data: existing } = await supabase
@@ -93,136 +93,145 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#050505] text-white flex items-center justify-center">
-        <p className="text-zinc-400 tracking-[0.3em] uppercase">Loading...</p>
+      <main className="flex min-h-screen items-center justify-center bg-[#050505] text-white">
+        <p className="uppercase tracking-[0.35em] text-zinc-500">Loading</p>
       </main>
     );
   }
 
   return (
-    <main className="relative min-h-screen overflow-hidden bg-[#050505] text-white">
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-[-8rem] top-[-5rem] h-64 w-[32rem] rotate-[-28deg] rounded-[2rem] border border-white/10 bg-gradient-to-br from-zinc-700/30 to-black shadow-2xl shadow-black" />
-        <div className="absolute right-[-9rem] top-[-6rem] h-72 w-[34rem] rotate-[20deg] rounded-[2rem] border border-white/10 bg-gradient-to-br from-zinc-800/40 to-black shadow-2xl shadow-black" />
-        <div className="absolute bottom-[-8rem] left-[-10rem] h-72 w-[34rem] rotate-[32deg] rounded-[2rem] border border-white/10 bg-gradient-to-br from-zinc-800/35 to-black shadow-2xl shadow-black" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(124,58,237,0.10),transparent_30%,transparent_100%)]" />
-      </div>
-
-      <header className="relative z-10 border-b border-white/10 bg-black/20 backdrop-blur-xl">
+    <main className="min-h-screen bg-[#050505] text-white">
+      <header className="border-b border-white/10 bg-black/40 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6">
-          <a href="/" className="text-2xl font-black tracking-[0.14em]">
+          <a href="/" className="text-2xl font-black tracking-[0.12em]">
             <span className="bg-gradient-to-r from-violet-500 to-violet-300 bg-clip-text text-transparent">OG</span>
-            <span className="text-zinc-100">PAYTRUE</span>
+            <span>PAYTRUE</span>
           </a>
 
           <nav className="flex items-center gap-3">
-            <a href="/orders" className="rounded-xl border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5">
-              Orders
-            </a>
-            <a href="/cart" className="rounded-xl bg-violet-600 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-500">
+            <a href="/cart" className="flex items-center gap-2 rounded-2xl bg-violet-600 px-5 py-3 font-semibold hover:bg-violet-500">
+              <ShoppingCart size={20} />
               Cart
             </a>
-            <button onClick={logout} className="rounded-xl border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5">
+
+            <a href="/orders" className="flex items-center gap-2 rounded-2xl border border-white/10 px-5 py-3 text-zinc-300 hover:bg-white/5">
+              <Package size={20} />
+              Orders
+            </a>
+
+            <a href="/wallet" className="flex items-center gap-2 rounded-2xl border border-white/10 px-5 py-3 text-zinc-300 hover:bg-white/5">
+              <Wallet size={20} />
+              Wallet
+            </a>
+
+            <button onClick={logout} className="flex items-center gap-2 rounded-2xl border border-white/10 px-5 py-3 text-zinc-300 hover:bg-white/5">
+              <LogOut size={20} />
               Logout
             </button>
           </nav>
         </div>
       </header>
 
-      <section className="relative z-10 mx-auto max-w-7xl px-6 py-10">
-        <div className="mb-10 rounded-[2rem] border border-white/10 bg-black/35 p-8 shadow-[0_0_60px_rgba(124,58,237,0.10)] backdrop-blur-xl">
-          <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-            <div>
-              <p className="text-sm uppercase tracking-[0.35em] text-emerald-300">
-                24/7 ACTIVE
-              </p>
+      <section className="mx-auto max-w-7xl px-6 py-12">
+        <div className="mb-10 flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <h1 className="text-5xl font-bold">Client Dashboard</h1>
+            <p className="mt-3 text-zinc-400">Welcome back, {email}</p>
+          </div>
 
-              <h1 className="mt-4 text-3xl font-bold md:text-4xl">
-                Client Dashboard
-              </h1>
-
-              <p className="mt-4 text-zinc-400">
-                Logged in as {email}
-              </p>
-
-              <div className="mt-6 inline-flex items-center gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/10 px-6 py-4">
-                <div>
-                  <p className="text-xs uppercase tracking-[0.25em] text-zinc-400">
-                    Wallet Balance
-                  </p>
-
-                  <p className="mt-1 text-3xl font-bold text-emerald-300">
-                    ${balance.toFixed(2)}
-                  </p>
-
-                  <a
-                    href="/wallet"
-                    className="mt-4 inline-block rounded-xl bg-emerald-600 px-5 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-white hover:bg-emerald-500"
-                  >
-                    Add Funds
-                  </a>
-
-                  
-                </div>
-              </div>
-            </div>
-
-            
+          <div className="rounded-3xl border border-white/10 bg-white/[0.04] px-7 py-5">
+            <p className="text-sm uppercase tracking-[0.25em] text-violet-400">Status</p>
+            <p className="mt-2 text-2xl font-bold">Verified Client</p>
           </div>
         </div>
 
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Available Products</h2>
-          <p className="text-sm text-zinc-500">{products.length} products</p>
-        </div>
-
-        <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-          {products.map((product) => {
-            const availablePacks = Math.floor(product.stock_count / product.lines_per_pack);
-
-            return (
-              <div key={product.id} className="rounded-[1.5rem] border border-white/10 bg-black/35 p-6 shadow-2xl backdrop-blur-xl transition hover:border-violet-500/40">
-                <div className="mb-5 flex items-start justify-between gap-4">
-                  <h3 className="text-2xl font-bold">{product.title}</h3>
-
-                  <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300">
-                    {availablePacks > 0 ? "In Stock" : "Out"}
-                  </span>
-                </div>
-
-                <p className="min-h-16 text-zinc-400">
-                  {product.description || "Digital product available for verified clients."}
-                </p>
-
-                <div className="mt-6 grid grid-cols-2 gap-4">
-                  <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                    <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Price</p>
-                    <p className="mt-2 text-2xl font-bold">${product.price_per_pack}</p>
-                  </div>
-
-                  <div className="rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                    <p className="text-xs uppercase tracking-[0.2em] text-zinc-500">Pack</p>
-                    <p className="mt-2 text-2xl font-bold">{product.lines_per_pack}</p>
-                  </div>
-                </div>
-
-                <div className="mt-5 rounded-xl border border-white/10 bg-white/[0.03] p-4">
-                  <p className="text-sm text-zinc-400">
-                    Stock: {product.stock_count} lines · {availablePacks} packs available
-                  </p>
-                </div>
-
-                <button
-                  onClick={() => addToCart(product.id)}
-                  disabled={availablePacks <= 0}
-                  className="mt-6 w-full rounded-xl bg-violet-600 px-6 py-4 font-semibold uppercase tracking-[0.2em] text-white shadow-[0_0_28px_rgba(124,58,237,0.28)] transition hover:bg-violet-500 disabled:cursor-not-allowed disabled:bg-zinc-800 disabled:text-zinc-500"
-                >
-                  {availablePacks > 0 ? "Add to Cart" : "Out of Stock"}
-                </button>
+        <div className="grid gap-6 lg:grid-cols-2">
+          <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-8 shadow-2xl">
+            <p className="text-sm uppercase tracking-[0.25em] text-violet-400">Wallet Balance</p>
+            <div className="mt-5 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="text-5xl font-black text-emerald-300">${balance.toFixed(2)}</h2>
+                <p className="mt-3 text-zinc-400">Available Balance</p>
               </div>
-            );
-          })}
+
+              <a href="/wallet" className="flex items-center justify-center gap-2 rounded-2xl bg-violet-600 px-7 py-4 font-semibold hover:bg-violet-500">
+                <PlusCircle size={22} />
+                Add Funds
+              </a>
+            </div>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2">
+            <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-8">
+              <div className="mb-5 grid h-14 w-14 place-items-center rounded-2xl bg-violet-600/20 text-violet-300">
+                <Box size={28} />
+              </div>
+              <h3 className="text-4xl font-black">{products.length}</h3>
+              <p className="mt-2 text-zinc-400">Products Available</p>
+            </div>
+
+            <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-8">
+              <div className="mb-5 grid h-14 w-14 place-items-center rounded-2xl bg-emerald-500/20 text-emerald-300">
+                <ShieldCheck size={28} />
+              </div>
+              <h3 className="text-4xl font-black">24/7</h3>
+              <p className="mt-2 text-zinc-400">Active Platform</p>
+            </div>
+          </div>
         </div>
+
+        <section className="mt-10 rounded-3xl border border-white/10 bg-white/[0.04] p-8">
+          <div className="mb-8 flex items-center justify-between">
+            <h2 className="text-3xl font-bold">Featured Products</h2>
+            <a href="/cart" className="text-violet-400 hover:text-violet-300">View cart →</a>
+          </div>
+
+          <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
+            {products.map((product) => {
+              const packsAvailable = Math.floor(
+                Number(product.stock_count || 0) / Number(product.lines_per_pack || 1)
+              );
+
+              return (
+                <div key={product.id} className="overflow-hidden rounded-3xl border border-white/10 bg-black/40">
+                  <div className="grid h-36 place-items-center bg-gradient-to-br from-violet-950 via-black to-violet-900/40">
+                    <Package size={54} className="text-violet-300" />
+                  </div>
+
+                  <div className="p-5">
+                    <div className="flex items-center justify-between gap-3">
+                      <h3 className="text-xl font-bold">{product.title}</h3>
+                      <span className="rounded-full border border-violet-500/40 px-3 py-1 text-xs text-violet-300">
+                        {product.lines_per_pack} lines
+                      </span>
+                    </div>
+
+                    <p className="mt-3 line-clamp-2 min-h-12 text-sm text-zinc-400">
+                      {product.description || "Premium digital product."}
+                    </p>
+
+                    <p className="mt-5 text-2xl font-black text-emerald-300">
+                      ${Number(product.price_per_pack).toFixed(2)}
+                    </p>
+
+                    <p className="mt-2 text-xs text-zinc-500">
+                      {packsAvailable} packs available
+                    </p>
+
+                    <button
+                      onClick={() => addToCart(product.id)}
+                      disabled={packsAvailable <= 0}
+                      className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl border border-violet-500/50 px-5 py-3 font-semibold text-violet-300 hover:bg-violet-500/10 disabled:cursor-not-allowed disabled:border-zinc-700 disabled:text-zinc-600"
+                    >
+                      <ShoppingCart size={18} />
+                      Add to Cart
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
       </section>
     </main>
   );
