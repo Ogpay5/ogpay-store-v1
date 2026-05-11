@@ -34,18 +34,11 @@ export default function RegisterPage() {
         role: "client",
         balance: 0,
       });
-
-,
-      });
-
-      if (!notifyResponse.ok) {
-        const notifyError = await notifyResponse.json();
-        console.error("Admin email failed:", notifyError);
-      }
     }
 
-    alert("Account created. Check your email to verify your account.");
-
+    alert(
+      "Account created.\n\nPlease check your email to verify your account.\n\nAfter verification, your access must be approved by admin for privacy and security."
+    );
   }
 
   return (
@@ -65,18 +58,17 @@ export default function RegisterPage() {
             CREATE YOUR ACCOUNT
           </h2>
 
-          
-          <div className="mb-8 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5">
+          <div className="mb-8 mt-8 rounded-2xl border border-amber-500/20 bg-amber-500/10 p-5">
             <p className="text-sm uppercase tracking-[0.25em] text-amber-300">
               Privacy Notice
             </p>
 
             <p className="mt-3 leading-7 text-zinc-300">
-              New client registrations require manual admin approval before access is granted to the private portal infrastructure.
+              New client registrations require manual admin approval after email verification before access is granted.
             </p>
           </div>
 
-<div className="mt-10 space-y-6">
+          <div className="mt-10 space-y-6">
             <input
               className="w-full rounded-xl border border-white/10 bg-black/30 px-5 py-4 text-white outline-none focus:border-violet-500"
               type="email"
